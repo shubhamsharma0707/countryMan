@@ -1,14 +1,30 @@
-import React, { useState, useEffect, useRef } from 'react';
-import Plot from 'react-plotly.js';
+import React, { useState, useEffect, useRef, Component } from 'react';
+import * as ReactPlotlyFactory from 'react-plotly.js/factory';
+import * as PlotlyDist from 'plotly.js-dist-min';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, Activity, Zap, Shield, Database, TrendingUp, Globe, Leaf } from 'lucide-react';
 import './index.css';
 
-// ── Animated counter ─────────────────────────────────────────────────────────
-function Counter({ value, suffix = '', decimals = 0, duration = 2000 }) {
+// CJS modules may export via .default when bundled by Vite
+const createPlotlyComponent = ReactPlotlyFactory.default ?? ReactPlotlyFactory;
+const Plotly = PlotlyDist.default ?? PlotlyDist;
+const Plot = createPlotlyComponent(Plotly);
+
+// ── Error Boundary — isolates chart crashes from the rest of the page ────────
+class ErrorBoundary extends Component {
+  constructor(props) { super(props); this.state = { hasError: false }; }
+  static getDerivedStateFromError() { return { hasError: true }; }
+  render() {
+    if (this.state.hasError)
+      return <div className="chart-error">⚠ Chart failed to render</div>;
+    return this.props.children;
+  }
+}
+
+// ── Animated counter ──────────────────────────────────────────────────────────
+function Counter({ value, suffix = '', decimals = 0, duration = 1800 }) {
   const [display, setDisplay] = useState(0);
   const startRef = useRef(null);
-
   useEffect(() => {
     if (value == null) return;
     startRef.current = performance.now();
@@ -21,8 +37,7 @@ function Counter({ value, suffix = '', decimals = 0, duration = 2000 }) {
     };
     requestAnimationFrame(animate);
   }, [value, decimals, duration]);
-
-  return <span>{display.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}{suffix}</span>;
+  return <>{display.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}{suffix}</>;
 }
 
 // ── Stat card ─────────────────────────────────────────────────────────────────
@@ -40,16 +55,18 @@ function StatCard({ label, value, suffix = '', delta, decimals = 1, icon: Icon }
       <div className="stat-value">
         {value != null ? <Counter value={value} suffix={suffix} decimals={decimals} /> : '—'}
       </div>
-      {delta && <div className="stat-delta" style={{ color: delta > 0 ? '#10b981' : '#f43f5e' }}>
-        {delta > 0 ? '▲' : '▼'} {Math.abs(delta).toFixed(2)}
-      </div>}
+      {delta != null && (
+        <div className="stat-delta" style={{ color: delta > 0 ? '#10b981' : '#f43f5e' }}>
+          {delta > 0 ? '▲' : '▼'} {Math.abs(delta).toFixed(1)}
+        </div>
+      )}
     </motion.div>
   );
 }
 
 // ── Chart wrapper ─────────────────────────────────────────────────────────────
 function ChartCard({ title, plotData, plotLayout, height = 380 }) {
-  if (!plotData) return null;
+  if (!plotData || !Array.isArray(plotData)) return null;
   return (
     <motion.div
       className="chart-container"
@@ -58,54 +75,62 @@ function ChartCard({ title, plotData, plotLayout, height = 380 }) {
       viewport={{ once: true }}
       transition={{ duration: 0.7 }}
     >
-      {title && <h3 style={{ marginBottom: '1rem', fontSize: '1rem', color: '#e4e4e7', fontFamily: "'Outfit', sans-serif" }}>{title}</h3>}
-      <Plot
-        data={plotData}
-        layout={{
-          ...plotLayout,
-          autosize: true,
-          paper_bgcolor: 'transparent',
-          plot_bgcolor: 'transparent',
-          font: { ...plotLayout?.font, color: '#a1a1aa' },
-        }}
-        config={{ displayModeBar: false, responsive: true }}
-        useResizeHandler
-        style={{ width: '100%', height: `${height}px` }}
-      />
+      {title && (
+        <h3 style={{ marginBottom: '1rem', fontSize: '0.95rem', color: '#e4e4e7', fontFamily: "'Outfit', sans-serif", fontWeight: 600 }}>
+          {title}
+        </h3>
+      )}
+      <ErrorBoundary>
+        <Plot
+          data={plotData}
+          layout={{
+            ...plotLayout,
+            autosize: true,
+            paper_bgcolor: 'transparent',
+            plot_bgcolor: 'transparent',
+            font: { ...(plotLayout?.font ?? {}), color: '#a1a1aa' },
+          }}
+          config={{ displayModeBar: false, responsive: true }}
+          useResizeHandler
+          style={{ width: '100%', height: `${height}px` }}
+        />
+      </ErrorBoundary>
     </motion.div>
   );
 }
 
 // ── Main App ──────────────────────────────────────────────────────────────────
 export default function App() {
-  const [data, setData]     = useState(null);
+  const [data, setData]       = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError]   = useState(null);
+  const [error, setError]     = useState(null);
+
   const { scrollYProgress } = useScroll();
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
-  const heroY       = useTransform(scrollYProgress, [0, 0.15], [0, -60]);
+  // Hero fades only after 25% scroll — gives time for content to appear
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.25], [1, 0]);
+  const heroY       = useTransform(scrollYProgress, [0, 0.25], [0, -80]);
 
   useEffect(() => {
     fetch('http://localhost:8000/api/dashboard')
-      .then(r => { if (!r.ok) throw new Error(r.statusText); return r.json(); })
-      .then(d => { setData(d); setLoading(false); })
-      .catch(e => { setError(e.message); setLoading(false); });
+      .then((r) => { if (!r.ok) throw new Error(r.statusText); return r.json(); })
+      .then((d) => { setData(d); setLoading(false); })
+      .catch((e) => { setError(e.message); setLoading(false); });
   }, []);
 
-  const m = data?.metrics ?? {};
-  const af = data?.af_stats ?? {};
-  const plots = data?.plots ?? {};
+  const m     = data?.metrics   ?? {};
+  const af    = data?.af_stats  ?? {};
+  const plots = data?.plots     ?? {};
 
   return (
-    <>
+    <ErrorBoundary>
       {/* ── Navbar ── */}
       <nav className="navbar">
         <div className="nav-brand">EnergyDignity</div>
         <div className="nav-links">
-          <a href="#overview"   className="nav-link">Overview</a>
-          <a href="#dashboard"  className="nav-link">Dashboard</a>
-          <a href="#analysis"   className="nav-link">Analysis</a>
-          <a href="#policies"   className="nav-link">Policy</a>
+          <a href="#overview"  className="nav-link">Overview</a>
+          <a href="#dashboard" className="nav-link">Dashboard</a>
+          <a href="#analysis"  className="nav-link">Analysis</a>
+          <a href="#policies"  className="nav-link">Policy</a>
         </div>
         <div className="live-badge">
           <span className="live-dot" />
@@ -146,16 +171,22 @@ export default function App() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
           >
-            <button className="btn-primary" onClick={() => document.getElementById('dashboard').scrollIntoView({ behavior: 'smooth' })}>
-              Explore Dashboard <ArrowRight size={16} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: 6 }} />
+            <button
+              className="btn-primary"
+              onClick={() => document.getElementById('dashboard')?.scrollIntoView({ behavior: 'smooth' })}
+            >
+              Explore Dashboard
+              <ArrowRight size={16} />
             </button>
-            <button className="btn-ghost" onClick={() => document.getElementById('analysis').scrollIntoView({ behavior: 'smooth' })}>
+            <button
+              className="btn-ghost"
+              onClick={() => document.getElementById('analysis')?.scrollIntoView({ behavior: 'smooth' })}
+            >
               View Analysis
             </button>
           </motion.div>
         </motion.div>
 
-        {/* Ambient bg orbs */}
         <div className="hero-orb hero-orb--1" />
         <div className="hero-orb hero-orb--2" />
       </section>
@@ -170,12 +201,12 @@ export default function App() {
         </motion.h2>
         <div className="features-grid">
           {[
-            { icon: Activity, title: 'Real-Time Analytics', desc: 'Sub-second latency integration with POSOCO dispatch data and live grid telemetry.' },
-            { icon: Database, title: 'Alkire-Foster Model', desc: 'Multidimensional poverty calculations spanning 6 energy dimensions and 30+ state-level indicators.' },
-            { icon: Shield,   title: 'Policy Tracking',    desc: 'Automated ingestion of regulatory changes, mapped directly to vulnerability risk scores.' },
-            { icon: TrendingUp, title: 'Scenario Engine',  desc: 'Bootstrap confidence intervals and Monte Carlo projections for future EDI trajectories.' },
-            { icon: Globe,    title: 'State Coverage',     desc: 'Urban and rural decomposition for all 30+ states and union territories in India.' },
-            { icon: Leaf,     title: 'Clean Energy Mix',   desc: 'Tracks solar, wind, hydro, and thermal generation in real-time for a complete energy picture.' },
+            { icon: Activity,   title: 'Real-Time Analytics',      desc: 'Sub-second latency integration with POSOCO dispatch data and live grid telemetry.' },
+            { icon: Database,   title: 'Alkire-Foster Model',       desc: 'Multidimensional poverty across 6 energy dimensions and 30+ state-level indicators.' },
+            { icon: Shield,     title: 'Policy Tracking',           desc: 'Automated ingestion of regulatory changes mapped to vulnerability risk scores.' },
+            { icon: TrendingUp, title: 'Scenario Engine',           desc: 'Bootstrap confidence intervals and projections for future EDI trajectories.' },
+            { icon: Globe,      title: 'State Coverage',            desc: 'Urban and rural decomposition across all 30+ Indian states and union territories.' },
+            { icon: Leaf,       title: 'Clean Energy Mix',          desc: 'Tracks solar, wind, hydro, and thermal generation for a complete energy picture.' },
           ].map(({ icon: Icon, title, desc }, i) => (
             <motion.div
               key={title}
@@ -194,27 +225,29 @@ export default function App() {
       </section>
 
       {/* ── Live Metrics Banner ── */}
-      <section className="metrics-banner" id="dashboard">
+      <div className="metrics-banner" id="dashboard">
         {loading ? (
           <div className="loading-state">
-            <span className="loading-dot" /><span className="loading-dot" /><span className="loading-dot" />
-            <p>Loading intelligence&hellip;</p>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <span className="loading-dot" /><span className="loading-dot" /><span className="loading-dot" />
+            </div>
+            <p>Loading intelligence…</p>
           </div>
         ) : error ? (
-          <div className="error-state">⚠ Backend not responding — start the API server on port 8000.</div>
+          <div className="error-state">⚠ API unreachable — ensure the backend is running on port 8000.</div>
         ) : (
           <div className="stat-grid">
-            <StatCard icon={Zap}        label="Current Demand"     value={m.current_demand_gw}    suffix=" GW"  decimals={1} />
-            <StatCard icon={Leaf}       label="Renewable Share"    value={m.renewable_share}       suffix="%"   decimals={1} delta={2.4} />
-            <StatCard icon={Globe}      label="Electrification"    value={m.electrification_rate}  suffix="%"   decimals={1} delta={0.3} />
-            <StatCard icon={Activity}   label="Clean Cooking"      value={m.clean_cooking_access}  suffix="%"   decimals={1} delta={1.8} />
-            <StatCard icon={Database}   label="Multidim. Poverty H" value={af.H != null ? af.H * 100 : null} suffix="%" decimals={1} />
-            <StatCard icon={TrendingUp} label="Solar Capacity"     value={m.solar_gw}              suffix=" GW"  decimals={1} delta={8.5} />
+            <StatCard icon={Zap}        label="Current Demand"        value={m.current_demand_gw}                        suffix=" GW" decimals={1} />
+            <StatCard icon={Leaf}       label="Renewable Share"       value={m.renewable_share}                           suffix="%"  decimals={1} delta={2.4} />
+            <StatCard icon={Globe}      label="Electrification"       value={m.electrification_rate}                      suffix="%"  decimals={1} delta={0.3} />
+            <StatCard icon={Activity}   label="Clean Cooking"         value={m.clean_cooking_access}                      suffix="%"  decimals={1} delta={1.8} />
+            <StatCard icon={Database}   label="Poverty Headcount"     value={af.H != null ? af.H * 100 : null}            suffix="%"  decimals={1} />
+            <StatCard icon={TrendingUp} label="Solar Capacity"        value={m.solar_gw}                                  suffix=" GW" decimals={1} delta={8.5} />
           </div>
         )}
-      </section>
+      </div>
 
-      {/* ── Dashboard Charts ── */}
+      {/* ── Charts Dashboard ── */}
       {data && (
         <section className="section dashboard-section" id="analysis">
           <motion.p className="section-eyebrow" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
@@ -225,8 +258,8 @@ export default function App() {
           </motion.h2>
 
           <div className="dashboard-row">
-            <ChartCard title="EDI Trajectory — 2018–2024"     plotData={plots.trend?.data}    plotLayout={plots.trend?.layout}    height={380} />
-            <ChartCard title="National Dimension Radar"       plotData={plots.radar?.data}    plotLayout={plots.radar?.layout}    height={380} />
+            <ChartCard title="EDI Trajectory 2018–2024"         plotData={plots.trend?.data}    plotLayout={plots.trend?.layout}    height={380} />
+            <ChartCard title="National Dimension Radar"         plotData={plots.radar?.data}    plotLayout={plots.radar?.layout}    height={380} />
           </div>
 
           <div style={{ marginTop: '2rem' }}>
@@ -234,18 +267,18 @@ export default function App() {
           </div>
 
           <div className="dashboard-row" style={{ marginTop: '2rem' }}>
-            <ChartCard title="Generation Mix"                 plotData={plots.donut?.data}    plotLayout={plots.donut?.layout}    height={380} />
-            <ChartCard title="Dimension Correlation Matrix"   plotData={plots.heatmap?.data}  plotLayout={plots.heatmap?.layout}  height={380} />
+            <ChartCard title="Generation Mix"                   plotData={plots.donut?.data}    plotLayout={plots.donut?.layout}    height={380} />
+            <ChartCard title="Dimension Correlation Matrix"     plotData={plots.heatmap?.data}  plotLayout={plots.heatmap?.layout}  height={380} />
           </div>
 
           <div style={{ marginTop: '2rem' }}>
-            <ChartCard title="State EDI Rankings"             plotData={plots.bar?.data}      plotLayout={plots.bar?.layout}      height={Math.max(460, (data.state_data?.length ?? 30) * 11)} />
+            <ChartCard title="State EDI Rankings (Urban)"       plotData={plots.bar?.data}      plotLayout={plots.bar?.layout}      height={Math.max(460, (data.state_data?.length ?? 30) * 11)} />
           </div>
         </section>
       )}
 
       {/* ── Policy Feed ── */}
-      {data?.policies?.length > 0 && (
+      {(data?.policies?.length ?? 0) > 0 && (
         <section className="section" id="policies" style={{ background: '#0a0a0c' }}>
           <motion.p className="section-eyebrow" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
             Policy Radar
@@ -279,6 +312,6 @@ export default function App() {
           <p>Data: POSOCO · MoPNG · CEA · NFHS-5 · {new Date().getFullYear()}</p>
         </div>
       </footer>
-    </>
+    </ErrorBoundary>
   );
 }

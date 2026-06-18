@@ -405,6 +405,27 @@ h1, h2, h3, h4 { font-family: 'Outfit', sans-serif; }
   font-size: 0.95rem;
 }
 
+.chart-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+}
+
+.chart-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+
 /* ──────────────────────────────────────────
    FOOTER
 ────────────────────────────────────────── */
