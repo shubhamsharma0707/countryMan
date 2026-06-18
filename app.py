@@ -33,20 +33,22 @@ st.set_page_config(
 st.markdown("""
 <style>
   /* ── Google Font ── */
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap');
 
   /* ── Base reset ── */
   html, body, [class*="css"] {
     font-family: 'Inter', sans-serif;
   }
 
-  /* ── Full black background ── */
+  /* ── Full dark gradient background ── */
   .stApp {
-    background: #000000 !important;
+    background: radial-gradient(circle at top left, #12182b, #05080f 100%) !important;
   }
   section[data-testid="stSidebar"] {
-    background: #0a0a0a !important;
-    border-right: 1px solid #1a1a1a;
+    background: rgba(10, 14, 23, 0.6) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
   }
   .block-container {
     padding-top: 1.5rem !important;
@@ -56,86 +58,112 @@ st.markdown("""
   /* ── Typography ── */
   h1, h2, h3, h4, h5, h6,
   .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
+    font-family: 'Outfit', sans-serif !important;
     color: #ffffff !important;
     font-weight: 700;
     letter-spacing: -0.5px;
   }
   p, li, label, span,
   .stMarkdown p, .stMarkdown li {
-    color: #a0a0a0 !important;
+    color: #94a3b8 !important;
   }
 
   /* ── Hero header ── */
   .hero-title {
-    font-size: 2.6rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 3.2rem;
     font-weight: 800;
-    background: linear-gradient(135deg, #ffffff 0%, #888888 100%);
+    background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    letter-spacing: -1px;
+    letter-spacing: -1.5px;
     line-height: 1.1;
+    animation: fadeInDown 0.8s ease-out;
   }
   .hero-sub {
-    font-size: 0.95rem;
-    color: #555555 !important;
+    font-size: 1.05rem;
+    color: #64748b !important;
     font-weight: 400;
-    margin-top: 0.4rem;
+    margin-top: 0.5rem;
+    animation: fadeInUp 0.8s ease-out;
   }
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
   .live-badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: #111111;
-    border: 1px solid #222222;
-    color: #888888 !important;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #10b981 !important;
     font-size: 0.75rem;
     font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
     padding: 4px 10px;
-    border-radius: 4px;
-    margin-top: 0.5rem;
+    border-radius: 6px;
+    margin-top: 0.8rem;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
   }
   .live-dot {
     width: 6px; height: 6px;
-    background: #22c55e;
+    background: #10b981;
     border-radius: 50%;
     animation: pulse-dot 1.8s ease-in-out infinite;
     display: inline-block;
+    box-shadow: 0 0 8px #10b981;
   }
   @keyframes pulse-dot {
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.4; transform: scale(0.7); }
   }
 
-  /* ── KPI cards ── */
+  /* ── KPI cards (Glassmorphism) ── */
   .kpi-card {
-    background: #0d0d0d;
-    border: 1px solid #1c1c1c;
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
     padding: 1.4rem 1.6rem;
     position: relative;
     overflow: hidden;
-    transition: border-color 0.3s ease, transform 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   }
   .kpi-card:hover {
-    border-color: #333333;
-    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0, 242, 254, 0.15);
   }
   .kpi-card::before {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 2px;
-    background: linear-gradient(90deg, #1a1a1a, #ffffff22, #1a1a1a);
-    animation: shimmer 3s linear infinite;
+    background: linear-gradient(90deg, transparent, rgba(0, 242, 254, 0.8), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .kpi-card:hover::before {
+    opacity: 1;
+    animation: shimmer 2s linear infinite;
   }
   @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
   }
   .kpi-label {
-    font-size: 0.72rem;
-    color: #555555 !important;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.75rem;
+    color: #94a3b8 !important;
     font-weight: 600;
     letter-spacing: 1.5px;
     text-transform: uppercase;
@@ -147,52 +175,61 @@ st.markdown("""
     color: #ffffff !important;
     font-family: 'JetBrains Mono', monospace;
     line-height: 1;
+    background: linear-gradient(to right, #ffffff, #cbd5e1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
   .kpi-delta {
-    font-size: 0.78rem;
-    margin-top: 0.4rem;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
     font-weight: 500;
+    font-family: 'Inter', sans-serif;
   }
-  .kpi-delta.up { color: #22c55e !important; }
+  .kpi-delta.up { color: #10b981 !important; }
   .kpi-delta.down { color: #ef4444 !important; }
-  .kpi-delta.neutral { color: #888888 !important; }
+  .kpi-delta.neutral { color: #64748b !important; }
 
   /* ── Section dividers ── */
   .section-title {
-    font-size: 0.72rem;
-    color: #444444 !important;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    color: #64748b !important;
     font-weight: 600;
     letter-spacing: 2px;
     text-transform: uppercase;
-    margin: 2rem 0 1rem 0;
+    margin: 2.5rem 0 1.2rem 0;
     padding-bottom: 0.5rem;
-    border-bottom: 1px solid #1a1a1a;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   /* ── Tab styling ── */
   .stTabs [data-baseweb="tab-list"] {
-    background: #0a0a0a !important;
-    border-bottom: 1px solid #1a1a1a !important;
+    background: rgba(10, 14, 23, 0.4) !important;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
     gap: 0;
+    border-radius: 12px 12px 0 0;
+    padding: 0 1rem;
   }
   .stTabs [data-baseweb="tab"] {
     background: transparent !important;
-    color: #555555 !important;
-    font-size: 0.82rem;
+    color: #64748b !important;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
     font-weight: 600;
     letter-spacing: 0.5px;
-    padding: 0.7rem 1.4rem !important;
+    padding: 1rem 1.4rem !important;
     border-bottom: 2px solid transparent !important;
-    transition: all 0.25s ease;
+    transition: all 0.3s ease;
   }
   .stTabs [aria-selected="true"] {
-    color: #ffffff !important;
-    border-bottom: 2px solid #ffffff !important;
+    color: #00f2fe !important;
+    border-bottom: 2px solid #00f2fe !important;
     background: transparent !important;
   }
   .stTabs [data-baseweb="tab"]:hover {
-    color: #cccccc !important;
-    background: #111111 !important;
+    color: #e2e8f0 !important;
+    background: rgba(255, 255, 255, 0.02) !important;
   }
   .stTabs [data-baseweb="tab-panel"] {
     background: transparent !important;
@@ -204,57 +241,80 @@ st.markdown("""
   .stSidebar .stSelectbox label,
   .stSidebar .stSlider label,
   .stSidebar p {
-    color: #888888 !important;
-    font-size: 0.82rem;
+    color: #94a3b8 !important;
+    font-size: 0.85rem;
+    font-weight: 500;
   }
   .sidebar-brand {
-    font-size: 1.05rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.2rem;
     font-weight: 800;
-    color: #ffffff !important;
+    background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     letter-spacing: -0.5px;
   }
   .sidebar-brand-sub {
-    font-size: 0.72rem;
-    color: #444444 !important;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.75rem;
+    color: #64748b !important;
     letter-spacing: 1px;
     text-transform: uppercase;
+    font-weight: 600;
   }
 
-  /* ── Dataframe ── */
+  /* ── Dataframe (Glassmorphism) ── */
   .stDataFrame {
-    background: #0d0d0d !important;
-    border: 1px solid #1a1a1a !important;
-    border-radius: 8px !important;
+    background: rgba(255, 255, 255, 0.02) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: 12px !important;
   }
   [data-testid="stDataFrameResizable"] {
-    background: #0d0d0d !important;
+    background: transparent !important;
   }
 
   /* ── Buttons ── */
   .stButton > button {
-    background: #1a1a1a !important;
-    color: #ffffff !important;
-    border: 1px solid #333333 !important;
+    background: rgba(0, 242, 254, 0.1) !important;
+    color: #00f2fe !important;
+    border: 1px solid rgba(0, 242, 254, 0.3) !important;
     border-radius: 8px !important;
     font-weight: 600 !important;
-    font-size: 0.82rem !important;
+    font-size: 0.85rem !important;
     letter-spacing: 0.5px !important;
-    padding: 0.5rem 1.2rem !important;
-    transition: all 0.25s ease !important;
+    padding: 0.6rem 1.4rem !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 4px 14px 0 rgba(0, 242, 254, 0.1);
   }
   .stButton > button:hover {
-    background: #262626 !important;
-    border-color: #555555 !important;
+    background: rgba(0, 242, 254, 0.2) !important;
+    border-color: rgba(0, 242, 254, 0.6) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 242, 254, 0.2);
+    color: #fff !important;
   }
 
   /* ── Select/Multi-select ── */
   .stMultiSelect [data-baseweb="select"] {
-    background: #111111 !important;
-    border-color: #222222 !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 8px;
+    transition: border-color 0.3s;
+  }
+  .stMultiSelect [data-baseweb="select"]:hover {
+    border-color: rgba(0, 242, 254, 0.5) !important;
   }
   .stSelectbox [data-baseweb="select"] {
-    background: #111111 !important;
-    border-color: #222222 !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 8px;
+    transition: border-color 0.3s;
+  }
+  .stSelectbox [data-baseweb="select"]:hover {
+    border-color: rgba(0, 242, 254, 0.5) !important;
   }
 
   /* ── Slider ── */
@@ -262,50 +322,59 @@ st.markdown("""
 
   /* ── Metrics (native) ── */
   [data-testid="stMetric"] {
-    background: #0d0d0d !important;
-    border: 1px solid #1a1a1a !important;
-    border-radius: 10px !important;
-    padding: 1rem !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: 12px !important;
+    padding: 1.2rem !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   }
-  [data-testid="stMetricLabel"] { color: #666666 !important; }
-  [data-testid="stMetricValue"] { color: #ffffff !important; }
+  [data-testid="stMetricLabel"] { color: #94a3b8 !important; font-weight: 500; font-family: 'Outfit', sans-serif; }
+  [data-testid="stMetricValue"] { color: #ffffff !important; font-family: 'JetBrains Mono', monospace; }
   [data-testid="stMetricDelta"] svg { display: none; }
 
   /* ── Policy card ── */
   .policy-card {
-    background: #0d0d0d;
-    border: 1px solid #1a1a1a;
-    border-radius: 10px;
-    padding: 1rem 1.2rem;
-    margin-bottom: 0.7rem;
-    border-left: 3px solid #333333;
-    transition: border-left-color 0.3s;
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1.2rem;
+    margin-bottom: 0.8rem;
+    border-left: 3px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
   }
-  .policy-card.positive { border-left-color: #22c55e; }
-  .policy-card.neutral  { border-left-color: #888888; }
+  .policy-card:hover {
+    background: rgba(255, 255, 255, 0.04);
+    transform: translateX(4px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  }
+  .policy-card.positive { border-left-color: #10b981; }
+  .policy-card.neutral  { border-left-color: #3b82f6; }
   .policy-card.negative { border-left-color: #ef4444; }
-  .policy-date { font-size: 0.72rem; color: #444444 !important; font-family: 'JetBrains Mono', monospace; }
-  .policy-title { font-size: 0.92rem; font-weight: 700; color: #cccccc !important; margin: 0.2rem 0; }
-  .policy-detail { font-size: 0.80rem; color: #555555 !important; }
+  .policy-date { font-size: 0.75rem; color: #64748b !important; font-family: 'JetBrains Mono', monospace; }
+  .policy-title { font-size: 1rem; font-family: 'Outfit', sans-serif; font-weight: 700; color: #e2e8f0 !important; margin: 0.3rem 0; }
+  .policy-detail { font-size: 0.85rem; color: #94a3b8 !important; line-height: 1.5; }
 
   /* ── Risk badge ── */
-  .risk-high { color: #ef4444 !important; font-weight: 700; }
-  .risk-med  { color: #f59e0b !important; font-weight: 700; }
-  .risk-low  { color: #22c55e !important; font-weight: 700; }
+  .risk-high { color: #ef4444 !important; font-weight: 600; background: rgba(239, 68, 68, 0.1); padding: 0.4rem 0.8rem; border-radius: 6px; border: 1px solid rgba(239, 68, 68, 0.2); margin-bottom: 0.5rem;}
+  .risk-med  { color: #f59e0b !important; font-weight: 600; background: rgba(245, 158, 11, 0.1); padding: 0.4rem 0.8rem; border-radius: 6px; border: 1px solid rgba(245, 158, 11, 0.2); margin-bottom: 0.5rem;}
+  .risk-low  { color: #10b981 !important; font-weight: 600; background: rgba(16, 185, 129, 0.1); padding: 0.4rem 0.8rem; border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.2); margin-bottom: 0.5rem;}
 
   /* ── Info box ── */
   .stAlert {
-    background: #0d0d0d !important;
-    border: 1px solid #1a1a1a !important;
-    border-radius: 8px !important;
-    color: #888888 !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 12px !important;
+    color: #cbd5e1 !important;
   }
 
   /* ── Scrollbar ── */
-  ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: #0a0a0a; }
-  ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
-  ::-webkit-scrollbar-thumb:hover { background: #3a3a3a; }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }
+  ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
 
   /* ── Hide Streamlit branding ── */
   #MainMenu, footer, header { visibility: hidden; }
@@ -317,22 +386,22 @@ st.markdown("""
 PLOT_THEME = dict(
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
-    font=dict(family="Inter", color="#888888", size=12),
-    colorway=["#ffffff", "#555555", "#888888", "#333333", "#aaaaaa", "#222222"],
-    xaxis=dict(gridcolor="#111111", zerolinecolor="#1a1a1a", linecolor="#1a1a1a"),
-    yaxis=dict(gridcolor="#111111", zerolinecolor="#1a1a1a", linecolor="#1a1a1a"),
-    legend=dict(bgcolor="rgba(0,0,0,0)", bordercolor="#1a1a1a"),
-    title=dict(font=dict(color="#ffffff", size=14, family="Inter"), x=0.0, xanchor="left"),
+    font=dict(family="Inter", color="#94a3b8", size=12),
+    colorway=["#00f2fe", "#4facfe", "#fdfbfb", "#ebedee", "#38bdf8", "#818cf8"],
+    xaxis=dict(gridcolor="rgba(255, 255, 255, 0.05)", zerolinecolor="rgba(255, 255, 255, 0.1)", linecolor="rgba(255, 255, 255, 0.1)"),
+    yaxis=dict(gridcolor="rgba(255, 255, 255, 0.05)", zerolinecolor="rgba(255, 255, 255, 0.1)", linecolor="rgba(255, 255, 255, 0.1)"),
+    legend=dict(bgcolor="rgba(0,0,0,0)", bordercolor="rgba(255, 255, 255, 0.1)"),
+    title=dict(font=dict(color="#ffffff", size=15, family="Outfit"), x=0.0, xanchor="left"),
     margin=dict(l=0, r=0, t=40, b=0),
 )
 
-GRAY_SCALE = ["#ffffff", "#d4d4d4", "#a3a3a3", "#737373", "#525252", "#404040", "#262626", "#171717"]
+GRAY_SCALE = ["#ffffff", "#e2e8f0", "#cbd5e1", "#94a3b8", "#64748b", "#475569", "#334155", "#1e293b"]
 
 
 def apply_theme(fig: go.Figure, height: int = 380) -> go.Figure:
     fig.update_layout(**PLOT_THEME, height=height)
-    fig.update_xaxes(gridcolor="#111111", zerolinecolor="#1a1a1a", linecolor="#0a0a0a")
-    fig.update_yaxes(gridcolor="#111111", zerolinecolor="#1a1a1a", linecolor="#0a0a0a")
+    fig.update_xaxes(gridcolor="rgba(255, 255, 255, 0.05)", zerolinecolor="rgba(255, 255, 255, 0.1)", linecolor="rgba(255, 255, 255, 0.1)")
+    fig.update_yaxes(gridcolor="rgba(255, 255, 255, 0.05)", zerolinecolor="rgba(255, 255, 255, 0.1)", linecolor="rgba(255, 255, 255, 0.1)")
     return fig
 
 
@@ -390,8 +459,8 @@ def make_3d_edi_surface(state_df: pd.DataFrame) -> go.Figure:
         x=x_idx, y=[1] * len(x_idx), z=z_urban,
         mode="lines+markers",
         name="Urban",
-        line=dict(color="white", width=4),
-        marker=dict(size=5, color=z_urban, colorscale=[[0, "#333333"], [1, "#ffffff"]]),
+        line=dict(color="#00f2fe", width=4),
+        marker=dict(size=5, color=z_urban, colorscale=[[0, "#0f172a"], [1, "#00f2fe"]]),
     ))
 
     # Rural surface
@@ -399,8 +468,8 @@ def make_3d_edi_surface(state_df: pd.DataFrame) -> go.Figure:
         x=x_idx, y=[0] * len(x_idx), z=z_rural,
         mode="lines+markers",
         name="Rural",
-        line=dict(color="#555555", width=4),
-        marker=dict(size=5, color=z_rural, colorscale=[[0, "#1a1a1a"], [1, "#888888"]]),
+        line=dict(color="#38bdf8", width=4),
+        marker=dict(size=5, color=z_rural, colorscale=[[0, "#0f172a"], [1, "#38bdf8"]]),
     ))
 
     # Vertical connectors
@@ -461,19 +530,19 @@ def make_3d_scatter(state_df: pd.DataFrame) -> go.Figure:
         mode="markers+text",
         text=df["state"].apply(lambda s: s[:10]),
         textposition="top center",
-        textfont=dict(size=7, color="#555555"),
+        textfont=dict(size=7, color="#94a3b8"),
         marker=dict(
             size=6,
             color=df["EDI"],
-            colorscale=[[0, "#1a1a1a"], [0.5, "#555555"], [1, "#ffffff"]],
+            colorscale=[[0, "#0f172a"], [0.5, "#38bdf8"], [1, "#00f2fe"]],
             colorbar=dict(
-                title=dict(text="EDI", font=dict(color="#666666", size=11)),
-                tickfont=dict(color="#666666"),
-                bordercolor="#1a1a1a",
+                title=dict(text="EDI", font=dict(color="#cbd5e1", size=11)),
+                tickfont=dict(color="#cbd5e1"),
+                bordercolor="rgba(255,255,255,0.1)",
                 bgcolor="rgba(0,0,0,0)",
             ),
             showscale=True,
-            line=dict(width=0.5, color="#333333"),
+            line=dict(width=0.5, color="rgba(255,255,255,0.2)"),
         ),
     )])
 
@@ -514,8 +583,8 @@ def make_radar(scores: dict, title: str = "Dimension Profile") -> go.Figure:
         r=vals + [vals[0]],
         theta=cats + [cats[0]],
         fill="toself",
-        fillcolor="rgba(255,255,255,0.05)",
-        line=dict(color="#ffffff", width=2),
+        fillcolor="rgba(0, 242, 254, 0.15)",
+        line=dict(color="#00f2fe", width=2),
         name=title,
     ))
     # Reference circle at 0.5
@@ -551,7 +620,8 @@ def make_animated_bar(state_df: pd.DataFrame, metric: str = "EDI") -> go.Figure:
     color_vals = urban[metric].values
     norm = (color_vals - color_vals.min()) / (np.ptp(color_vals) or 1)
 
-    colors = [f"rgba({int(255*v)},{int(255*v)},{int(255*v)},1)" for v in norm]
+    # Sleek cyan to blue gradient
+    colors = [f"rgba({int(56 + (0-56)*v)}, {int(189 + (242-189)*v)}, {int(248 + (254-248)*v)}, 0.85)" for v in norm]
 
     fig = go.Figure(go.Bar(
         x=urban[metric],
@@ -560,7 +630,7 @@ def make_animated_bar(state_df: pd.DataFrame, metric: str = "EDI") -> go.Figure:
         marker=dict(color=colors, line=dict(width=0)),
         text=[f"{v:.3f}" for v in urban[metric]],
         textposition="outside",
-        textfont=dict(size=9, color="#555555"),
+        textfont=dict(size=9, color="#94a3b8"),
         hovertemplate="<b>%{y}</b><br>EDI: %{x:.4f}<extra></extra>",
     ))
     apply_theme(fig, height=max(420, len(urban) * 22))
@@ -655,13 +725,13 @@ def make_corr_heatmap(state_df: pd.DataFrame) -> go.Figure:
     fig = go.Figure(go.Heatmap(
         z=corr.values,
         x=labels, y=labels,
-        colorscale=[[0, "#000000"], [0.5, "#333333"], [1, "#ffffff"]],
+        colorscale=[[0, "#05080f"], [0.5, "#38bdf8"], [1, "#00f2fe"]],
         zmin=-1, zmax=1,
         text=[[f"{v:.2f}" for v in row] for row in corr.values],
         texttemplate="%{text}",
-        textfont=dict(size=10, color="#888888"),
+        textfont=dict(size=10, color="#ffffff"),
         hovertemplate="<b>%{x} × %{y}</b><br>r = %{z:.3f}<extra></extra>",
-        colorbar=dict(tickfont=dict(color="#666666"), bordercolor="#1a1a1a",
+        colorbar=dict(tickfont=dict(color="#cbd5e1"), bordercolor="rgba(255,255,255,0.1)",
                       bgcolor="rgba(0,0,0,0)", thickness=12),
     ))
     apply_theme(fig, height=380)
@@ -840,15 +910,15 @@ def main():
             # Alkire-Foster stats
             af = model.alkire_foster(filtered)
             st.markdown(f"""
-            <div style="background:#0d0d0d;border:1px solid #1a1a1a;border-radius:10px;padding:1rem 1.2rem;margin-top:0.5rem;">
-              <div class="kpi-label">Alkire-Foster Poverty Measure (k=1/3)</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-top:0.6rem;">
-                <div><div style="color:#555;font-size:0.70rem;text-transform:uppercase;letter-spacing:1px;">Headcount H</div>
-                     <div style="color:#fff;font-size:1.4rem;font-weight:700;font-family:'JetBrains Mono';">{af['H']:.3f}</div></div>
-                <div><div style="color:#555;font-size:0.70rem;text-transform:uppercase;letter-spacing:1px;">Intensity A</div>
-                     <div style="color:#fff;font-size:1.4rem;font-weight:700;font-family:'JetBrains Mono';">{af['A']:.3f}</div></div>
-                <div><div style="color:#555;font-size:0.70rem;text-transform:uppercase;letter-spacing:1px;">M0</div>
-                     <div style="color:#fff;font-size:1.4rem;font-weight:700;font-family:'JetBrains Mono';">{af['M0']:.3f}</div></div>
+            <div style="background:rgba(255,255,255,0.03);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:1.4rem 1.6rem;margin-top:0.5rem;box-shadow:0 4px 20px rgba(0,0,0,0.2);">
+              <div class="kpi-label" style="font-family:'Outfit',sans-serif;color:#94a3b8;font-size:0.75rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;">Alkire-Foster Poverty Measure (k=1/3)</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-top:0.8rem;">
+                <div><div style="color:#64748b;font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;font-weight:500;">Headcount H</div>
+                     <div style="background:linear-gradient(to right,#fff,#cbd5e1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:1.6rem;font-weight:800;font-family:'JetBrains Mono';">{af['H']:.3f}</div></div>
+                <div><div style="color:#64748b;font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;font-weight:500;">Intensity A</div>
+                     <div style="background:linear-gradient(to right,#fff,#cbd5e1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:1.6rem;font-weight:800;font-family:'JetBrains Mono';">{af['A']:.3f}</div></div>
+                <div><div style="color:#64748b;font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;font-weight:500;">M0</div>
+                     <div style="background:linear-gradient(to right,#fff,#cbd5e1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:1.6rem;font-weight:800;font-family:'JetBrains Mono';">{af['M0']:.3f}</div></div>
               </div>
             </div>""", unsafe_allow_html=True)
 
