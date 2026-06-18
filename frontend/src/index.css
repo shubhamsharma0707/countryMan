@@ -193,6 +193,31 @@ h1, h2, h3, h4 { font-family: 'Outfit', sans-serif; }
   bottom: -100px; right: -150px;
 }
 
+/* Hero CTA group */
+.hero-cta {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 2.5rem;
+}
+
+/* Chart card title */
+.chart-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #e4e4e7;
+  margin-bottom: 1rem;
+}
+
+/* Loading dots row */
+.loading-dots {
+  display: flex;
+  gap: 6px;
+}
+
+
 /* ──────────────────────────────────────────
    BUTTONS
 ────────────────────────────────────────── */
