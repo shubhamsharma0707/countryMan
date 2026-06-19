@@ -153,9 +153,6 @@ export default function App() {
           <a href="#analysis"  className="nav-link">Analysis</a>
           <a href="#policies"  className="nav-link">Policy</a>
         </div>
-        <div className="live-badge">
-          <span className="live-dot" />LIVE
-        </div>
       </nav>
 
       {/* ── Hero ── */}
